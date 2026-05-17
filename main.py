@@ -35,7 +35,7 @@ def main():
             response = process_command(user_text)
 
             if response is None:
-                speak("Systems offline. Shutting down, Sir.")
+                speak("Friday offline. Shutting down, Sir.")
                 break
 
             if response:
@@ -54,7 +54,7 @@ def main():
                 # Immediately process the command that woke her up
                 response = process_command(user_text)
                 if response is None:
-                    speak("Systems offline. Shutting down, Sir.")
+                    speak("Friday offline. Shutting down, Sir.")
                     break
                 if response:
                     speak_async(response)

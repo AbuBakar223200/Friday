@@ -123,7 +123,7 @@ Friday strictly adheres to local system security guidelines, defined in `system_
 Friday communicates exactly like Tony Stark's assistant:
 - **Startup**: *"Friday is online. How can I help you today, Sir?"*
 - **Wake Chime**: Active `*BEEP*` sound when waking up.
-- **Shutdown**: *"Systems offline. Shutting down, Sir."*
+- **Shutdown**: *"Friday offline. Shutting down, Sir."*
 
 ---
 
