@@ -20,7 +20,7 @@ def main():
             if not user_text:
                 awake_timeout_count += 1
                 if awake_timeout_count >= 2:
-                    print("[SYSTEM] Friday is going to sleep...")
+                    print("[friday] Friday is going to sleep...")
                     config.is_awake = False
                 continue
             
@@ -42,12 +42,12 @@ def main():
                 speak_async(response)
         else:
             # Sleeping mode: short timeout, short phrases
-            print("[SYSTEM] Sleeping. Say 'Friday' to wake up.")
+            print("[friday] Sleeping. Say 'Friday' to wake up.")
             user_text = listen(timeout=None, phrase_time_limit=3)
             
             if user_text:
                 winsound.Beep(800, 200) # Short high beep
-                print("[SYSTEM] Waking up!")
+                print("[friday] Waking up!")
                 config.is_awake = True
                 awake_timeout_count = 0
                 
@@ -64,4 +64,4 @@ if __name__ == "__main__":
         main()
     except KeyboardInterrupt:
         stop_speaking()
-        print("\n[SYSTEM] Friday systems offline.")
+        print("\n[friday] Friday systems offline.")
