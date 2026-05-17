@@ -1,5 +1,12 @@
-pyttsx3
+edge-tts
+pygame
 SpeechRecognition
 google-genai
 pyaudio
 python-dotenv
+pyautogui
+pyperclip
+screen-brightness-control
+pycaw
+comtypes
+pillow
