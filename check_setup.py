@@ -11,7 +11,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
 ENV_PATH = ROOT / ".env"
-CONFIG_PATH = ROOT / "config.py"
+SETTINGS_PATH = ROOT / "friday" / "settings.py"
 PROVIDER_KEYS = {
     "gemini": "GEMINI_API_KEY",
     "openai": "OPENAI_API_KEY",
@@ -74,12 +74,12 @@ def read_setting(key: str) -> str:
     return os.environ.get(key, "").strip() or read_dotenv_value(key)
 
 
-def read_config_constant(name: str) -> str:
-    if not CONFIG_PATH.exists():
+def read_settings_constant(name: str) -> str:
+    if not SETTINGS_PATH.exists():
         return ""
 
     try:
-        tree = ast.parse(CONFIG_PATH.read_text(encoding="utf-8"))
+        tree = ast.parse(SETTINGS_PATH.read_text(encoding="utf-8"))
     except (OSError, SyntaxError):
         return ""
 
@@ -180,6 +180,24 @@ def check_microphone(report: CheckReport) -> None:
         names = sr.Microphone.list_microphone_names()
         if names:
             report.ok(f"Microphone devices visible ({len(names)} found)")
+            configured_index = read_setting("MICROPHONE_DEVICE_INDEX")
+            if configured_index:
+                try:
+                    index = int(configured_index)
+                except ValueError:
+                    report.warn(f"MICROPHONE_DEVICE_INDEX is not a number: {configured_index}")
+                else:
+                    if 0 <= index < len(names):
+                        report.ok(f"MICROPHONE_DEVICE_INDEX={index} selects: {names[index]}")
+                    else:
+                        report.warn(
+                            f"MICROPHONE_DEVICE_INDEX={index} is outside the available range 0-{len(names) - 1}"
+                        )
+            else:
+                report.warn("MICROPHONE_DEVICE_INDEX is not set; Windows will choose the default input device.")
+                print("       Available microphone indexes:")
+                for index, name in enumerate(names):
+                    print(f"       {index}: {name}")
         else:
             report.warn("No microphone devices were reported. Check Windows microphone privacy settings.")
     except Exception as exc:
@@ -211,12 +229,12 @@ def check_screenshot(report: CheckReport) -> None:
 
 
 def check_chrome(report: CheckReport) -> None:
-    chrome_path = read_config_constant("CHROME_PATH")
+    chrome_path = read_settings_constant("CHROME_PATH")
     if not chrome_path:
-        report.warn("CHROME_PATH was not found in config.py")
+        report.warn("CHROME_PATH was not found in friday/settings.py")
         return
 
-    report.ok("CHROME_PATH is configured in config.py")
+    report.ok("CHROME_PATH is configured in friday/settings.py")
     if chrome_path.lower().startswith("c:\\"):
         report.warn("CHROME_PATH points to C:\\; this checker does not probe C:\\ because of Friday system rules.")
     elif Path(chrome_path).exists():
@@ -228,7 +246,7 @@ def check_chrome(report: CheckReport) -> None:
     if chrome_on_path:
         report.ok("Chrome is also available on PATH")
     else:
-        report.warn("Chrome was not found on PATH. Friday will use CHROME_PATH from config.py.")
+        report.warn("Chrome was not found on PATH. Friday will use CHROME_PATH from friday/settings.py.")
 
 
 def main() -> int:

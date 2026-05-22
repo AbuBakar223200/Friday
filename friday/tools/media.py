@@ -1,7 +1,8 @@
 import os
 import subprocess
-import config
-from config import VLC_PATH
+
+from friday import state
+from friday.settings import VLC_PATH
 
 def play_local_movie(movie_name: str) -> str:
     r"""
@@ -9,7 +10,7 @@ def play_local_movie(movie_name: str) -> str:
     """
     movie_name = movie_name.strip()
     if not movie_name:
-        if config.current_media_type == "movie" and config.is_media_paused:
+        if state.current_media_type == "movie" and state.is_media_paused:
             return "The current movie is paused. Say 'resume the movie' or 'play' to continue it."
         return "Which movie should I play?"
 
@@ -34,9 +35,9 @@ def play_local_movie(movie_name: str) -> str:
                         subprocess.Popen([VLC_PATH, item_path])
                     else:
                         os.startfile(item_path)
-                    config.current_media_title = item
-                    config.current_media_type = "movie"
-                    config.is_media_paused = False
+                    state.current_media_title = item
+                    state.current_media_type = "movie"
+                    state.is_media_paused = False
                     return f"Playing movie: {item}"
         except PermissionError:
             continue

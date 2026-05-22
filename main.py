@@ -22,67 +22,8 @@ if os.path.exists(venv_path):
             except Exception as e:
                 print(f"[SYSTEM] Failed to re-execute in virtual environment: {e}")
 
-from audio.stt import listen
-from audio.tts import speak, speak_async, stop_speaking
-from core.command_router import process_command
-from core.brain import ai_ready
-import config
-import winsound
-
-def main():
-    if not ai_ready():
-        print("\n[!] Exiting because no AI provider is configured.")
-        print("[!] Add GEMINI_API_KEY, OPENAI_API_KEY, ANTHROPIC_API_KEY, OPENROUTER_API_KEY, or OLLAMA_MODEL.")
-        return
-
-    speak("Friday is online. How can I help you today, Sir?")
-    config.is_awake = True
-    awake_timeout_count = 0
-
-    while True:
-        if config.is_awake:
-            user_text = listen()
-            if not user_text:
-                awake_timeout_count += 1
-                if awake_timeout_count >= 2:
-                    print("[friday] Friday is going to sleep...")
-                    config.is_awake = False
-                continue
-            
-            awake_timeout_count = 0
-            stop_speaking()
-
-            # Check if user specifically just said "friday" or "hey friday" while already awake
-            if user_text.strip() in ["friday", "hey friday"]:
-                winsound.Beep(800, 200) # Short high beep
-                continue
-
-            response = process_command(user_text)
-
-            if response is None:
-                speak("Friday offline. Shutting down, Sir.")
-                break
-
-            if response:
-                speak_async(response)
-        else:
-            # Sleeping mode: short timeout, short phrases
-            print("[friday] Sleeping. Say 'Friday' to wake up.")
-            user_text = listen(timeout=None, phrase_time_limit=config.WAKE_PHRASE_TIME_LIMIT)
-            
-            if user_text:
-                winsound.Beep(800, 200) # Short high beep
-                print("[friday] Waking up!")
-                config.is_awake = True
-                awake_timeout_count = 0
-                
-                # Immediately process the command that woke her up
-                response = process_command(user_text)
-                if response is None:
-                    speak("Friday offline. Shutting down, Sir.")
-                    break
-                if response:
-                    speak_async(response)
+from friday.app import main
+from friday.audio.tts import stop_speaking
 
 if __name__ == "__main__":
     try:

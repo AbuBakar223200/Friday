@@ -133,13 +133,31 @@ Friday listens until it detects a pause or reaches `PHRASE_TIME_LIMIT`. If it st
 PHRASE_TIME_LIMIT=30
 WAKE_PHRASE_TIME_LIMIT=8
 PAUSE_THRESHOLD=1.6
+AMBIENT_NOISE_DURATION=0.8
 ```
 
 Increase `PAUSE_THRESHOLD` to tolerate longer pauses between words. Increase `PHRASE_TIME_LIMIT` if your command itself is long.
 
+If Friday hears the wrong words, first make sure Windows is using the correct microphone. Then run:
+
+```bat
+.venv\Scripts\python.exe check_setup.py
+```
+
+If needed, set these in `.env`:
+
+```text
+MICROPHONE_DEVICE_INDEX=0
+STT_LANGUAGE=en-US
+DYNAMIC_ENERGY_THRESHOLD=true
+ENERGY_THRESHOLD=
+```
+
+Use the microphone index printed by the setup checker. For English spoken in South Asia, `en-IN` can work better than `en-US`; for Bangla, try `bn-BD`.
+
 ### Chrome Warning
 
-Friday reads `CHROME_PATH` from `config.py`. If Chrome is installed somewhere else, update that value. The setup checker does not broadly search the C drive because Friday's system rules restrict C-drive access.
+Friday reads `CHROME_PATH` from `friday/settings.py`. If Chrome is installed somewhere else, update that value. The setup checker does not broadly search the C drive because Friday's system rules restrict C-drive access.
 
 ## Privacy Note
 

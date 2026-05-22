@@ -7,7 +7,7 @@ from typing import Any
 
 from PIL import Image
 
-import config
+from friday import settings
 
 
 PROVIDER_ORDER = ("gemini", "openai", "anthropic", "openrouter", "ollama")
@@ -20,21 +20,21 @@ def _split_models(value: str) -> list[str]:
 
 def _provider_has_config(provider: str) -> bool:
     if provider == "gemini":
-        return bool(config.GEMINI_API_KEY)
+        return bool(settings.GEMINI_API_KEY)
     if provider == "openai":
-        return bool(config.OPENAI_API_KEY)
+        return bool(settings.OPENAI_API_KEY)
     if provider == "anthropic":
-        return bool(config.ANTHROPIC_API_KEY)
+        return bool(settings.ANTHROPIC_API_KEY)
     if provider == "openrouter":
-        return bool(config.OPENROUTER_API_KEY)
+        return bool(settings.OPENROUTER_API_KEY)
     if provider == "ollama":
-        return bool(config.OLLAMA_MODEL)
+        return bool(settings.OLLAMA_MODEL)
     return False
 
 
 def get_active_provider() -> str | None:
     """Return the configured provider, or the first available provider in auto mode."""
-    requested = config.AI_PROVIDER or "auto"
+    requested = settings.AI_PROVIDER or "auto"
     if requested != "auto":
         return requested if _provider_has_config(requested) else None
 
@@ -59,7 +59,7 @@ def describe_ai_status() -> str:
     if provider:
         return f"{provider} provider is configured."
 
-    requested = config.AI_PROVIDER or "auto"
+    requested = settings.AI_PROVIDER or "auto"
     if requested == "auto":
         return "No AI provider is configured. Add at least one provider API key or set OLLAMA_MODEL."
 
@@ -145,7 +145,7 @@ def _extract_anthropic_text(data: dict[str, Any]) -> str:
 def _gemini_text(prompt: str, system_prompt: str, models: list[str]) -> str:
     from google import genai
 
-    client = genai.Client(api_key=config.GEMINI_API_KEY)
+    client = genai.Client(api_key=settings.GEMINI_API_KEY)
     last_error = None
 
     for model_name in models:
@@ -169,7 +169,7 @@ def _gemini_text(prompt: str, system_prompt: str, models: list[str]) -> str:
 def _gemini_vision(prompt: str, image: Image.Image, system_prompt: str, models: list[str]) -> str:
     from google import genai
 
-    client = genai.Client(api_key=config.GEMINI_API_KEY)
+    client = genai.Client(api_key=settings.GEMINI_API_KEY)
     last_error = None
 
     for model_name in models:
@@ -194,7 +194,7 @@ def _openai_text(prompt: str, system_prompt: str, model: str) -> str:
     data = _http_json(
         "https://api.openai.com/v1/responses",
         {
-            "Authorization": f"Bearer {config.OPENAI_API_KEY}",
+            "Authorization": f"Bearer {settings.OPENAI_API_KEY}",
             "Content-Type": "application/json",
         },
         {
@@ -210,7 +210,7 @@ def _openai_vision(prompt: str, image: Image.Image, system_prompt: str, model: s
     data = _http_json(
         "https://api.openai.com/v1/responses",
         {
-            "Authorization": f"Bearer {config.OPENAI_API_KEY}",
+            "Authorization": f"Bearer {settings.OPENAI_API_KEY}",
             "Content-Type": "application/json",
         },
         {
@@ -234,7 +234,7 @@ def _anthropic_text(prompt: str, system_prompt: str, model: str) -> str:
     data = _http_json(
         "https://api.anthropic.com/v1/messages",
         {
-            "x-api-key": config.ANTHROPIC_API_KEY,
+            "x-api-key": settings.ANTHROPIC_API_KEY,
             "anthropic-version": "2023-06-01",
             "Content-Type": "application/json",
         },
@@ -252,7 +252,7 @@ def _anthropic_vision(prompt: str, image: Image.Image, system_prompt: str, model
     data = _http_json(
         "https://api.anthropic.com/v1/messages",
         {
-            "x-api-key": config.ANTHROPIC_API_KEY,
+            "x-api-key": settings.ANTHROPIC_API_KEY,
             "anthropic-version": "2023-06-01",
             "Content-Type": "application/json",
         },
@@ -285,7 +285,7 @@ def _openrouter_text(prompt: str, system_prompt: str, model: str) -> str:
     data = _http_json(
         "https://openrouter.ai/api/v1/chat/completions",
         {
-            "Authorization": f"Bearer {config.OPENROUTER_API_KEY}",
+            "Authorization": f"Bearer {settings.OPENROUTER_API_KEY}",
             "Content-Type": "application/json",
             "HTTP-Referer": "https://github.com/AbuBakar223200/Friday",
             "X-Title": "Friday Voice Assistant",
@@ -305,7 +305,7 @@ def _openrouter_vision(prompt: str, image: Image.Image, system_prompt: str, mode
     data = _http_json(
         "https://openrouter.ai/api/v1/chat/completions",
         {
-            "Authorization": f"Bearer {config.OPENROUTER_API_KEY}",
+            "Authorization": f"Bearer {settings.OPENROUTER_API_KEY}",
             "Content-Type": "application/json",
             "HTTP-Referer": "https://github.com/AbuBakar223200/Friday",
             "X-Title": "Friday Voice Assistant",
@@ -329,7 +329,7 @@ def _openrouter_vision(prompt: str, image: Image.Image, system_prompt: str, mode
 
 def _ollama_text(prompt: str, system_prompt: str, model: str) -> str:
     data = _http_json(
-        f"{config.OLLAMA_BASE_URL}/api/generate",
+        f"{settings.OLLAMA_BASE_URL}/api/generate",
         {"Content-Type": "application/json"},
         {
             "model": model,
@@ -345,7 +345,7 @@ def _ollama_text(prompt: str, system_prompt: str, model: str) -> str:
 
 def _ollama_vision(prompt: str, image: Image.Image, system_prompt: str, model: str) -> str:
     data = _http_json(
-        f"{config.OLLAMA_BASE_URL}/api/generate",
+        f"{settings.OLLAMA_BASE_URL}/api/generate",
         {"Content-Type": "application/json"},
         {
             "model": model,
@@ -368,15 +368,15 @@ def generate_text(prompt: str, system_prompt: str) -> str:
     print(f"[AI] Using {provider} for text.")
     try:
         if provider == "gemini":
-            return _gemini_text(prompt, system_prompt, _split_models(config.GEMINI_TEXT_MODELS))
+            return _gemini_text(prompt, system_prompt, _split_models(settings.GEMINI_TEXT_MODELS))
         if provider == "openai":
-            return _openai_text(prompt, system_prompt, config.OPENAI_TEXT_MODEL)
+            return _openai_text(prompt, system_prompt, settings.OPENAI_TEXT_MODEL)
         if provider == "anthropic":
-            return _anthropic_text(prompt, system_prompt, config.ANTHROPIC_TEXT_MODEL)
+            return _anthropic_text(prompt, system_prompt, settings.ANTHROPIC_TEXT_MODEL)
         if provider == "openrouter":
-            return _openrouter_text(prompt, system_prompt, config.OPENROUTER_TEXT_MODEL)
+            return _openrouter_text(prompt, system_prompt, settings.OPENROUTER_TEXT_MODEL)
         if provider == "ollama":
-            return _ollama_text(prompt, system_prompt, config.OLLAMA_MODEL)
+            return _ollama_text(prompt, system_prompt, settings.OLLAMA_MODEL)
     except Exception as exc:
         print(f"[AI:{provider}] text failed: {exc}")
 
@@ -391,15 +391,15 @@ def generate_vision(prompt: str, image: Image.Image, system_prompt: str) -> str:
     print(f"[AI] Using {provider} for vision.")
     try:
         if provider == "gemini":
-            return _gemini_vision(prompt, image, system_prompt, _split_models(config.GEMINI_VISION_MODELS))
+            return _gemini_vision(prompt, image, system_prompt, _split_models(settings.GEMINI_VISION_MODELS))
         if provider == "openai":
-            return _openai_vision(prompt, image, system_prompt, config.OPENAI_VISION_MODEL)
+            return _openai_vision(prompt, image, system_prompt, settings.OPENAI_VISION_MODEL)
         if provider == "anthropic":
-            return _anthropic_vision(prompt, image, system_prompt, config.ANTHROPIC_VISION_MODEL)
+            return _anthropic_vision(prompt, image, system_prompt, settings.ANTHROPIC_VISION_MODEL)
         if provider == "openrouter":
-            return _openrouter_vision(prompt, image, system_prompt, config.OPENROUTER_VISION_MODEL)
+            return _openrouter_vision(prompt, image, system_prompt, settings.OPENROUTER_VISION_MODEL)
         if provider == "ollama":
-            return _ollama_vision(prompt, image, system_prompt, config.OLLAMA_MODEL)
+            return _ollama_vision(prompt, image, system_prompt, settings.OLLAMA_MODEL)
     except Exception as exc:
         print(f"[AI:{provider}] vision failed: {exc}")
 

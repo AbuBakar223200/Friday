@@ -81,21 +81,24 @@ The project is currently a Python Windows desktop voice assistant.
 
 Important files:
 
-- `main.py`: main voice loop, awake/sleep state, command processing.
-- `core/command_router.py`: routes spoken text to tools or the configured AI provider.
-- `core/brain.py`: general assistant prompt and AI brain entry point.
-- `core/ai_provider.py`: configurable provider layer for Gemini, OpenAI, Anthropic, OpenRouter, and Ollama.
-- `tools/vision.py`: captures the screen in memory and sends it to the configured vision provider.
-- `tools/system.py`: app launching, folder/file creation, local folder search.
-- `tools/system_control.py`: volume, brightness, lock, media controls.
-- `audio/stt.py`: speech-to-text.
-- `audio/tts.py`: text-to-speech.
+- `main.py`: small launcher that re-enters the virtual environment and calls the packaged app.
+- `friday/app.py`: main voice loop, awake/sleep state transitions, command processing.
+- `friday/settings.py`: environment-backed settings and configured local executable paths.
+- `friday/state.py`: runtime state such as awake status, media status, current folder, and cached YouTube results.
+- `friday/core/command_router.py`: routes spoken text to tools or the configured AI provider.
+- `friday/core/brain.py`: general assistant prompt and AI brain entry point.
+- `friday/core/ai_provider.py`: configurable provider layer for Gemini, OpenAI, Anthropic, OpenRouter, and Ollama.
+- `friday/tools/vision.py`: captures the screen in memory and sends it to the configured vision provider.
+- `friday/tools/system.py`: app launching, folder/file creation, local folder search.
+- `friday/tools/system_control.py`: volume, brightness, lock, media controls.
+- `friday/audio/stt.py`: speech-to-text.
+- `friday/audio/tts.py`: text-to-speech.
 - `system_rules.md`: security rules, especially drive access restrictions.
 - `README.md`: public project overview.
 
 Existing useful capability:
 
-- `tools/vision.py` uses `PIL.ImageGrab.grab()` to capture a screenshot in memory.
+- `friday/tools/vision.py` uses `PIL.ImageGrab.grab()` to capture a screenshot in memory.
 - The screenshot is sent directly to the configured AI provider.
 - It does not need to save a screenshot file for the MVP.
 
@@ -242,7 +245,7 @@ Preferred implementation:
 1. Add a new file:
 
 ```text
-tools/debug_screen.py
+friday/tools/debug_screen.py
 ```
 
 2. Add a function:
@@ -252,7 +255,7 @@ def debug_screen(prompt: str) -> str:
     ...
 ```
 
-3. Reuse the same core logic as `tools/vision.py`:
+3. Reuse the same core logic as `friday/tools/vision.py`:
 
 - Check the configured AI provider.
 - Capture screenshot with `ImageGrab.grab()`.
@@ -261,7 +264,7 @@ def debug_screen(prompt: str) -> str:
 - Return a concise text response.
 - Do not save the image.
 
-4. Add command routing in `core/command_router.py` before the generic screen route:
+4. Add command routing in `friday/core/command_router.py` before the generic screen route:
 
 ```python
 if any(phrase in text for phrase in [
@@ -508,11 +511,11 @@ When another agent picks this up:
 1. Read this file first.
 2. Read `system_rules.md`.
 3. Read:
-   - `tools/vision.py`
-   - `core/command_router.py`
-   - `core/brain.py`
-4. Implement `tools/debug_screen.py`.
-5. Add the route in `core/command_router.py`.
+   - `friday/tools/vision.py`
+   - `friday/core/command_router.py`
+   - `friday/core/brain.py`
+4. Implement `friday/tools/debug_screen.py`.
+5. Add the route in `friday/core/command_router.py`.
 6. Run `python -m compileall .`.
 7. Manually test at least one visible coding error.
 8. Update README privacy and MVP usage notes.

@@ -1,18 +1,20 @@
 import speech_recognition as sr
-from config import LISTEN_TIMEOUT, PHRASE_TIME_LIMIT
+
+from friday import settings, state
 
 
 def _configure_recognizer(recognizer: sr.Recognizer) -> None:
-    import config
-
-    recognizer.pause_threshold = config.PAUSE_THRESHOLD
-    recognizer.phrase_threshold = config.PHRASE_THRESHOLD
+    recognizer.pause_threshold = settings.PAUSE_THRESHOLD
+    recognizer.phrase_threshold = settings.PHRASE_THRESHOLD
+    recognizer.dynamic_energy_threshold = settings.DYNAMIC_ENERGY_THRESHOLD
+    if settings.ENERGY_THRESHOLD is not None:
+        recognizer.energy_threshold = settings.ENERGY_THRESHOLD
     recognizer.non_speaking_duration = min(
-        config.NON_SPEAKING_DURATION,
-        max(0.1, config.PAUSE_THRESHOLD - 0.1),
+        settings.NON_SPEAKING_DURATION,
+        max(0.1, settings.PAUSE_THRESHOLD - 0.1),
     )
 
-def listen(timeout=LISTEN_TIMEOUT, phrase_time_limit=PHRASE_TIME_LIMIT) -> str | None:
+def listen(timeout=settings.LISTEN_TIMEOUT, phrase_time_limit=settings.PHRASE_TIME_LIMIT) -> str | None:
     """
     Listen to the microphone and convert speech to text using
     Google's free speech recognition API.
@@ -21,13 +23,12 @@ def listen(timeout=LISTEN_TIMEOUT, phrase_time_limit=PHRASE_TIME_LIMIT) -> str |
     _configure_recognizer(recognizer)
 
     try:
-        with sr.Microphone() as source:
-            import config
-            if config.is_awake:
+        with sr.Microphone(device_index=settings.MICROPHONE_DEVICE_INDEX) as source:
+            if state.is_awake:
                 print("\n[MIC] Adjusting for ambient noise...")
-            recognizer.adjust_for_ambient_noise(source, duration=0.5)
+            recognizer.adjust_for_ambient_noise(source, duration=settings.AMBIENT_NOISE_DURATION)
             
-            if config.is_awake:
+            if state.is_awake:
                 print("[MIC] Listening...")
 
             # Capture audio from the microphone
@@ -38,7 +39,7 @@ def listen(timeout=LISTEN_TIMEOUT, phrase_time_limit=PHRASE_TIME_LIMIT) -> str |
             )
 
         print("[MIC] Recognizing speech...")
-        text = recognizer.recognize_google(audio)
+        text = recognizer.recognize_google(audio, language=settings.STT_LANGUAGE)
         print(f"[YOU] {text}")
         return text.lower()
 
