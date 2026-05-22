@@ -1,14 +1,14 @@
-from tools.system import get_time, find_and_open_folder, create_folder, create_file, open_app
-from tools.youtube import play_youtube_result, play_on_youtube, youtube_search
-from tools.browser import open_in_chrome
-from tools.media import play_local_movie
-from tools.system_control import set_volume, set_brightness, lock_pc, pause_media, resume_media
-from tools.timer import start_timer
-from tools.vision import analyze_screen
-from tools.debug_screen import debug_screen
-from core.brain import ask_ai
-import config
 import re
+
+from friday import state
+from friday.core.brain import ask_ai
+from friday.tools.browser import open_in_chrome
+from friday.tools.debug_screen import debug_screen
+from friday.tools.media import play_local_movie
+from friday.tools.system import create_file, create_folder, find_and_open_folder, get_time, open_app
+from friday.tools.system_control import lock_pc, pause_media, resume_media, set_brightness, set_volume
+from friday.tools.timer import start_timer
+from friday.tools.vision import analyze_screen
 
 def _extract_after(text: str, keyword: str) -> str:
     parts = text.split(keyword, 1)
@@ -44,9 +44,9 @@ def _youtube_result_index(text: str) -> int | None:
         if re.search(rf"\bplay\s+(the\s+)?{re.escape(word)}(\s+(result|video|one))?\b", text):
             return idx
 
-    match = re.search(r"\bplay\s+(result|video|number)\s+(\d+)\b", text)
+    match = re.search(r"\bplay\s+(?:the\s+)?(?:result|video|number)(?:\s+number)?\s+(\d+)\b", text)
     if match:
-        return int(match.group(2)) - 1
+        return int(match.group(1)) - 1
 
     if re.search(r"\bplay\s+next(\s+(result|video|one))?\b", text):
         return 1
@@ -72,7 +72,7 @@ def process_command(text: str) -> str | None:
         return resume_media()
 
     if text in ["play the movie", "play movie", "continue the movie", "continue movie"]:
-        if config.current_media_type == "movie" and config.is_media_paused:
+        if state.current_media_type == "movie" and state.is_media_paused:
             return resume_media()
         return "Which movie should I play?"
 
@@ -157,7 +157,7 @@ def process_command(text: str) -> str | None:
         # Handle local movies before YouTube result selection so titles like "Panda 2" do not mean "play second".
         if "folder" not in text:
             query = _clean_local_media_query(text)
-            if not query and config.current_media_type == "movie" and config.is_media_paused:
+            if not query and state.current_media_type == "movie" and state.is_media_paused:
                 return resume_media()
             if query:
                 return play_local_movie(query)
@@ -192,7 +192,7 @@ def process_command(text: str) -> str | None:
         if query:
             if "movie" in query:
                 movie_query = _clean_local_media_query(query)
-                if not movie_query and config.current_media_type == "movie" and config.is_media_paused:
+                if not movie_query and state.current_media_type == "movie" and state.is_media_paused:
                     return resume_media()
                 if movie_query:
                     return play_local_movie(movie_query)

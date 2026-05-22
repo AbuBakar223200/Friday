@@ -1,6 +1,7 @@
 import subprocess
 import webbrowser
-from config import CHROME_PATH
+
+from friday.settings import CHROME_PATH
 
 def open_in_chrome(url: str) -> str:
     """

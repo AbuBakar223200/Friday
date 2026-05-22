@@ -108,20 +108,24 @@ Friday is organized as a Python desktop assistant with separate modules for voic
 
 ```mermaid
 graph TD
-    A[main.py: Awake/Sleep State And Main Loop] --> B[core/command_router.py: Command Routing]
-    B --> C[core/brain.py: AI Brain]
-    C --> M[core/ai_provider.py: Gemini/OpenAI/Anthropic/OpenRouter/Ollama]
+    A[main.py: Student-Friendly Launcher] --> APP[friday/app.py: Awake/Sleep Loop]
+    APP --> B[friday/core/command_router.py: Command Routing]
+    B --> C[friday/core/brain.py: AI Brain]
+    C --> M[friday/core/ai_provider.py: Gemini/OpenAI/Anthropic/OpenRouter/Ollama]
 
-    A --> D[audio/stt.py: Speech To Text]
-    A --> E[audio/tts.py: Text To Speech]
+    APP --> D[friday/audio/stt.py: Speech To Text]
+    APP --> E[friday/audio/tts.py: Text To Speech]
 
-    B --> F[tools/system_control.py: Volume, Brightness, PC Lock]
-    B --> G[tools/timer.py: Timers]
-    B --> H[tools/vision.py: Provider Screen Analysis]
-    B --> I[tools/system.py: App Launching And Local Search]
-    B --> J[tools/youtube.py: YouTube Automation]
-    B --> K[tools/media.py: Local Media Playback]
-    B --> L[tools/browser.py: Browser Automation]
+    B --> F[friday/tools/system_control.py: Volume, Brightness, PC Lock]
+    B --> G[friday/tools/timer.py: Timers]
+    B --> H[friday/tools/vision.py: Provider Screen Analysis]
+    B --> I[friday/tools/system.py: App Launching And Local Search]
+    B --> J[friday/tools/youtube.py: YouTube Automation]
+    B --> K[friday/tools/media.py: Local Media Playback]
+    B --> L[friday/tools/browser.py: Browser Automation]
+
+    APP --> S[friday/settings.py: Environment Settings]
+    APP --> T[friday/state.py: Runtime State]
 ```
 
 ## Security And Governance

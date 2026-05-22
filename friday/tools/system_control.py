@@ -3,7 +3,8 @@ import screen_brightness_control as sbc
 from ctypes import cast, POINTER
 from comtypes import CLSCTX_ALL
 from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
-import config
+
+from friday import state
 
 def set_volume(level: int) -> str:
     """Set the system volume to a specific percentage (0-100)."""
@@ -40,8 +41,8 @@ def set_brightness(level: int, display_type: str = None) -> str:
 
             if display_type is None:
                 # Ask the user interactively
-                from audio.tts import speak
-                from audio.stt import listen
+                from friday.audio.tts import speak
+                from friday.audio.stt import listen
                 
                 speak("I detect multiple screens. Should I adjust the laptop, the external monitor, or both?")
                 response = listen(timeout=5, phrase_time_limit=5)
@@ -87,8 +88,8 @@ def pause_media() -> str:
     try:
         import pyautogui
         pyautogui.press('playpause')
-        config.is_media_paused = True
-        if config.current_media_type == "movie":
+        state.is_media_paused = True
+        if state.current_media_type == "movie":
             return "Understood, I've paused the movie for you."
         return "Understood, I've paused the video for you."
     except Exception as e:
@@ -99,8 +100,8 @@ def resume_media() -> str:
     try:
         import pyautogui
         pyautogui.press('playpause')
-        config.is_media_paused = False
-        if config.current_media_type == "movie":
+        state.is_media_paused = False
+        if state.current_media_type == "movie":
             return "Understood, I've resumed the movie for you."
         return "Understood, I've resumed the video for you."
     except Exception as e:

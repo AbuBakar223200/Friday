@@ -1,8 +1,9 @@
 import os
 import subprocess
 import datetime
-import config
-from config import CHROME_PATH
+
+from friday import state
+from friday.settings import CHROME_PATH
 
 KNOWN_FOLDERS = {
     "desktop": os.path.join(os.environ["USERPROFILE"], "Desktop"),
@@ -19,7 +20,7 @@ def get_time() -> str:
 
 def open_folder(folder_path: str) -> str:
     if os.path.exists(folder_path):
-        config.current_folder = folder_path
+        state.current_folder = folder_path
         subprocess.Popen(["explorer", folder_path])
         return f"Opening folder: {os.path.basename(folder_path)}"
     else:
@@ -28,9 +29,9 @@ def open_folder(folder_path: str) -> str:
 def find_and_open_folder(folder_name: str) -> str:
     folder_name_lower = folder_name.lower()
 
-    if config.current_folder and os.path.exists(config.current_folder):
+    if state.current_folder and os.path.exists(state.current_folder):
         try:
-            with os.scandir(config.current_folder) as it:
+            with os.scandir(state.current_folder) as it:
                 for entry in it:
                     if entry.is_dir() and folder_name_lower in entry.name.lower():
                         return open_folder(entry.path)
@@ -100,7 +101,7 @@ def create_file(file_name: str, location: str = None) -> str:
         return f"Sorry, I couldn't create the file: {e}"
 
 def build_app_map():
-    if config._app_map:
+    if state.app_map:
         return
         
     paths = [
@@ -116,7 +117,7 @@ def build_app_map():
                 for f in files:
                     if f.endswith('.lnk'):
                         app_name = f[:-4].lower()
-                        config._app_map[app_name] = os.path.join(r, f)
+                        state.app_map[app_name] = os.path.join(r, f)
         except Exception:
             pass
 
@@ -142,11 +143,11 @@ def open_app(app_name: str) -> str:
     
     executable = app_map.get(key)
     
-    if not executable and key in config._app_map:
-        executable = config._app_map[key]
+    if not executable and key in state.app_map:
+        executable = state.app_map[key]
         
     if not executable:
-        for mapped_name, mapped_path in config._app_map.items():
+        for mapped_name, mapped_path in state.app_map.items():
             if key in mapped_name or mapped_name in key:
                 executable = mapped_path
                 break

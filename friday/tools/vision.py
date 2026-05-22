@@ -1,6 +1,7 @@
 from PIL import ImageGrab
-from core.ai_provider import generate_vision, is_vision_configured
-from core.brain import FRIDAY_SYSTEM_PROMPT
+
+from friday.core.ai_provider import generate_vision, is_vision_configured
+from friday.core.brain import FRIDAY_SYSTEM_PROMPT
 
 def analyze_screen(prompt: str) -> str:
     """Take a screenshot and pass it to the configured vision provider."""

@@ -10,7 +10,7 @@ def start_timer(minutes: int) -> str:
         # Wait the required time
         time.sleep(minutes * 60)
         # Import dynamically to avoid circular imports during startup
-        from audio.tts import speak_async
+        from friday.audio.tts import speak_async
         speak_async(f"Sir, your {minutes} minute timer is up.")
 
     t = threading.Thread(target=timer_callback, daemon=True)

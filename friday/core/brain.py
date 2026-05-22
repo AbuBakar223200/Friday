@@ -1,4 +1,4 @@
-from core.ai_provider import describe_ai_status, generate_text, is_ai_configured
+from friday.core.ai_provider import describe_ai_status, generate_text, is_ai_configured
 
 FRIDAY_SYSTEM_PROMPT = (
     "You are Friday, a highly intelligent and helpful AI voice assistant "

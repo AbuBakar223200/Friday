@@ -4,8 +4,9 @@ import requests
 import urllib.parse
 import pyautogui
 import pyperclip
-from tools.browser import open_in_chrome
-import config
+
+from friday import state
+from friday.tools.browser import open_in_chrome
 
 def _extract_video_ids(html_text: str, current_video_id: str = None, limit: int = 10) -> list:
     video_ids = re.findall(r'"videoId":"([a-zA-Z0-9_-]{11})"', html_text)
@@ -62,13 +63,13 @@ def youtube_search(query: str) -> str:
 
     try:
         resp = requests.get(search_url, headers={"User-Agent": "Mozilla/5.0"})
-        config.youtube_results = _extract_video_ids(resp.text)
-        count = len(config.youtube_results)
+        state.youtube_results = _extract_video_ids(resp.text)
+        count = len(state.youtube_results)
         print(f"[YOUTUBE] Found {count} videos for '{query}'")
         return f"Found {count} results for '{query}'. Say 'play first', 'play second', or 'play third' to play one!"
     except Exception as e:
         print(f"[YOUTUBE] Error fetching results: {e}")
-        config.youtube_results = []
+        state.youtube_results = []
         return f"Searching YouTube for '{query}'. Click on a video to play it!"
 
 def play_on_youtube(query: str) -> str:
@@ -76,10 +77,10 @@ def play_on_youtube(query: str) -> str:
 
     try:
         resp = requests.get(search_url, headers={"User-Agent": "Mozilla/5.0"})
-        config.youtube_results = _extract_video_ids(resp.text)
+        state.youtube_results = _extract_video_ids(resp.text)
 
-        if config.youtube_results:
-            video_url = f"https://www.youtube.com/watch?v={config.youtube_results[0]}"
+        if state.youtube_results:
+            video_url = f"https://www.youtube.com/watch?v={state.youtube_results[0]}"
             open_in_chrome(video_url)
             return f"Playing the first result for '{query}'. Say 'play second' or 'play third' to switch!"
         else:
@@ -93,14 +94,14 @@ def play_on_youtube(query: str) -> str:
 def play_youtube_result(index: int) -> str:
     scraped_videos = scrape_active_youtube_tab()
     if scraped_videos:
-        config.youtube_results = scraped_videos
-    elif not config.youtube_results:
+        state.youtube_results = scraped_videos
+    elif not state.youtube_results:
         return "I couldn't find any videos on your screen. Make sure the YouTube tab is open and active!"
             
-    if index >= len(config.youtube_results):
-        return f"I only found {len(config.youtube_results)} videos on this page. Try a smaller number."
+    if index >= len(state.youtube_results):
+        return f"I only found {len(state.youtube_results)} videos on this page. Try a smaller number."
 
-    video_url = f"https://www.youtube.com/watch?v={config.youtube_results[index]}"
+    video_url = f"https://www.youtube.com/watch?v={state.youtube_results[index]}"
     
     original_clipboard = pyperclip.paste()
     pyperclip.copy(video_url)

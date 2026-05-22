@@ -1,5 +1,6 @@
 from PIL import ImageGrab
-from core.ai_provider import generate_vision, is_vision_configured
+
+from friday.core.ai_provider import generate_vision, is_vision_configured
 
 
 DEBUG_SCREEN_SYSTEM_PROMPT = (

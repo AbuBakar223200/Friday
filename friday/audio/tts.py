@@ -5,8 +5,8 @@ import asyncio
 import pygame
 import edge_tts
 import threading
-from config import _tts_lock
-import config
+
+from friday import state
 
 # Initialize pygame mixer once for audio playback
 pygame.mixer.init()
@@ -24,14 +24,14 @@ def speak(text: str) -> None:
         communicate = edge_tts.Communicate(text, "en-US-JennyNeural")
         asyncio.run(communicate.save(filename))
         
-        with _tts_lock:
+        with state.tts_lock:
             if pygame.mixer.music.get_busy():
                 pygame.mixer.music.stop()
                 try:
                     pygame.mixer.music.unload()
                 except AttributeError:
                     pass
-            config._current_tts_file = filename
+            state.current_tts_file = filename
             
         pygame.mixer.music.load(filename)
         pygame.mixer.music.play()
@@ -59,7 +59,7 @@ def speak_async(text: str) -> threading.Thread:
 
 def stop_speaking() -> None:
     """Interrupt the current TTS playback if active."""
-    with _tts_lock:
+    with state.tts_lock:
         if pygame.mixer.music.get_busy():
             pygame.mixer.music.stop()
             try:
