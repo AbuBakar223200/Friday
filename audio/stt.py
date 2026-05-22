@@ -1,12 +1,24 @@
 import speech_recognition as sr
 from config import LISTEN_TIMEOUT, PHRASE_TIME_LIMIT
 
+
+def _configure_recognizer(recognizer: sr.Recognizer) -> None:
+    import config
+
+    recognizer.pause_threshold = config.PAUSE_THRESHOLD
+    recognizer.phrase_threshold = config.PHRASE_THRESHOLD
+    recognizer.non_speaking_duration = min(
+        config.NON_SPEAKING_DURATION,
+        max(0.1, config.PAUSE_THRESHOLD - 0.1),
+    )
+
 def listen(timeout=LISTEN_TIMEOUT, phrase_time_limit=PHRASE_TIME_LIMIT) -> str | None:
     """
     Listen to the microphone and convert speech to text using
     Google's free speech recognition API.
     """
     recognizer = sr.Recognizer()
+    _configure_recognizer(recognizer)
 
     try:
         with sr.Microphone() as source:
