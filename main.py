@@ -16,19 +16,23 @@ if os.path.exists(venv_path):
         if current_exe != venv_exe:
             try:
                 sys.exit(subprocess.call([venv_python] + sys.argv))
+            except KeyboardInterrupt:
+                print("\n[friday] Friday systems offline.")
+                sys.exit(130)
             except Exception as e:
                 print(f"[SYSTEM] Failed to re-execute in virtual environment: {e}")
 
 from audio.stt import listen
 from audio.tts import speak, speak_async, stop_speaking
 from core.command_router import process_command
-from core.brain import gemini_client
+from core.brain import ai_ready
 import config
 import winsound
 
 def main():
-    if gemini_client is None:
-        print("\n[!] Exiting because Gemini API key is missing.")
+    if not ai_ready():
+        print("\n[!] Exiting because no AI provider is configured.")
+        print("[!] Add GEMINI_API_KEY, OPENAI_API_KEY, ANTHROPIC_API_KEY, OPENROUTER_API_KEY, or OLLAMA_MODEL.")
         return
 
     speak("Friday is online. How can I help you today, Sir?")
@@ -64,7 +68,7 @@ def main():
         else:
             # Sleeping mode: short timeout, short phrases
             print("[friday] Sleeping. Say 'Friday' to wake up.")
-            user_text = listen(timeout=None, phrase_time_limit=3)
+            user_text = listen(timeout=None, phrase_time_limit=config.WAKE_PHRASE_TIME_LIMIT)
             
             if user_text:
                 winsound.Beep(800, 200) # Short high beep

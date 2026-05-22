@@ -3,6 +3,7 @@ import screen_brightness_control as sbc
 from ctypes import cast, POINTER
 from comtypes import CLSCTX_ALL
 from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
+import config
 
 def set_volume(level: int) -> str:
     """Set the system volume to a specific percentage (0-100)."""
@@ -86,6 +87,9 @@ def pause_media() -> str:
     try:
         import pyautogui
         pyautogui.press('playpause')
+        config.is_media_paused = True
+        if config.current_media_type == "movie":
+            return "Understood, I've paused the movie for you."
         return "Understood, I've paused the video for you."
     except Exception as e:
         return f"Sorry, I couldn't pause the video: {e}"
@@ -95,6 +99,9 @@ def resume_media() -> str:
     try:
         import pyautogui
         pyautogui.press('playpause')
+        config.is_media_paused = False
+        if config.current_media_type == "movie":
+            return "Understood, I've resumed the movie for you."
         return "Understood, I've resumed the video for you."
     except Exception as e:
         return f"Sorry, I couldn't resume the video: {e}"
