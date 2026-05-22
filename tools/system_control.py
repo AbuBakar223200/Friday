@@ -80,3 +80,21 @@ def lock_pc() -> str:
         return "Locking the computer."
     except Exception as e:
         return f"Sorry, I couldn't lock the computer: {e}"
+
+def pause_media() -> str:
+    """Pause media playback globally using system media keys."""
+    try:
+        import pyautogui
+        pyautogui.press('playpause')
+        return "Understood, I've paused the video for you."
+    except Exception as e:
+        return f"Sorry, I couldn't pause the video: {e}"
+
+def resume_media() -> str:
+    """Resume media playback globally using system media keys."""
+    try:
+        import pyautogui
+        pyautogui.press('playpause')
+        return "Understood, I've resumed the video for you."
+    except Exception as e:
+        return f"Sorry, I couldn't resume the video: {e}"

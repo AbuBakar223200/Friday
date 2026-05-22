@@ -2,7 +2,7 @@ from tools.system import get_time, find_and_open_folder, create_folder, create_f
 from tools.youtube import play_youtube_result, play_on_youtube, youtube_search
 from tools.browser import open_in_chrome
 from tools.media import play_local_movie
-from tools.system_control import set_volume, set_brightness, lock_pc
+from tools.system_control import set_volume, set_brightness, lock_pc, pause_media, resume_media
 from tools.timer import start_timer
 from tools.vision import analyze_screen
 from core.brain import ask_gemini
@@ -22,6 +22,13 @@ def process_command(text: str) -> str | None:
     """
     if any(word in text for word in ["stop", "goodbye", "bye", "shut down", "exit", "quit"]):
         return None
+
+    # -- Media Controls (Pause / Resume) --
+    if "pause" in text:
+        return pause_media()
+
+    if "resume" in text or text.strip() in ["play", "play the video", "play video", "play the music", "play music", "play the song", "play song"]:
+        return resume_media()
 
     # -- Timers --
     if "timer" in text:
